@@ -10,6 +10,7 @@ import (
 const blockColumns = 14
 const blockRows = 8
 const startingBlocks = blockColumns * blockRows
+const headingHeight = 40
 
 type Game struct {
 	blocks []Block
@@ -30,7 +31,7 @@ func NewGame() *Game {
 		col := (i + 1) - (blockColumns * (row - 1))
 
 		xoffset = float32((spacer * col) + ((blockWidth * col) - blockWidth))
-		yoffset = float32(((blockHeight * row) - blockHeight) + (spacer * row))
+		yoffset = float32(((blockHeight * row) - blockHeight) + (spacer * row) + headingHeight)
 
 		switch row {
 		case 1, 2:
@@ -108,7 +109,7 @@ func (g *Game) handleMovement() {
 }
 
 func (g *Game) checkCollisions() {
-	//block
+	//blocks
 	for i, block := range g.blocks {
 		if block.hit {
 			continue
@@ -153,7 +154,7 @@ func (g *Game) checkCollisions() {
 	}
 
 	//walls
-	if (g.ball.y - g.ball.radius) <= 0 {
+	if (g.ball.y - g.ball.radius) <= headingHeight {
 
 		fmt.Println("collision with ceiling")
 		g.ball.switchDirection()
