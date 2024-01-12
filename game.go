@@ -19,13 +19,13 @@ const headingHeight = 40
 
 var (
 	normalFont font.Face
-	score      int
 )
 
 type Game struct {
 	blocks []Block
 	paddle Paddle
 	ball   Ball
+	score  int
 }
 
 func NewGame() *Game {
@@ -97,7 +97,7 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	text.Draw(screen, fmt.Sprint(score), normalFont, 10, 30, color.White)
+	text.Draw(screen, fmt.Sprintf("%03d", g.score), normalFont, 10, 30, color.White)
 	for _, b := range g.blocks {
 		b.Draw(screen)
 	}
@@ -151,7 +151,7 @@ func (g *Game) checkCollisions() {
 				g.ball.switchDirection()
 				fmt.Println("heading", g.ball.heading)
 				fmt.Println("speed", g.ball.speed)
-				incrementScore(block.colour)
+				g.incrementScore(block.colour)
 				break
 			}
 
@@ -161,7 +161,7 @@ func (g *Game) checkCollisions() {
 				g.ball.switchDirection()
 				fmt.Println("heading", g.ball.heading)
 				fmt.Println("speed", g.ball.speed)
-				incrementScore(block.colour)
+				g.incrementScore(block.colour)
 				break
 			}
 
@@ -171,7 +171,7 @@ func (g *Game) checkCollisions() {
 				g.ball.bounceOffWall()
 				fmt.Println("heading", g.ball.heading)
 				fmt.Println("speed", g.ball.speed)
-				incrementScore(block.colour)
+				g.incrementScore(block.colour)
 				break
 			}
 
@@ -181,7 +181,7 @@ func (g *Game) checkCollisions() {
 				g.ball.bounceOffWall()
 				fmt.Println("heading", g.ball.heading)
 				fmt.Println("speed", g.ball.speed)
-				incrementScore(block.colour)
+				g.incrementScore(block.colour)
 				break
 			}
 		}
@@ -231,5 +231,18 @@ func (g *Game) checkCollisions() {
 		g.ball.switchDirection()
 		fmt.Println("heading", g.ball.heading)
 		fmt.Println("speed", g.ball.speed)
+	}
+}
+
+func (g *Game) incrementScore(colour color.RGBA) {
+	switch colour {
+	case color.RGBA{R: 0xa3, G: 0x1e, B: 0x0a, A: 0xff}:
+		g.score += 7
+	case color.RGBA{R: 0xc2, G: 0x85, B: 0x0a, A: 0xff}:
+		g.score += 5
+	case color.RGBA{R: 0x0a, G: 0x85, B: 0x33, A: 0xff}:
+		g.score += 3
+	case color.RGBA{R: 0xc2, G: 0xc2, B: 0x29, A: 0xff}:
+		g.score += 1
 	}
 }
