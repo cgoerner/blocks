@@ -15,6 +15,7 @@
 package main
 
 import (
+	"image/color"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -31,5 +32,19 @@ func main() {
 	ebiten.SetWindowTitle("Blocks")
 	if err := ebiten.RunGame(NewGame()); err != nil {
 		log.Fatal(err)
+	}
+}
+
+func incrementScore(colour color.RGBA) {
+	switch colour {
+	case color.RGBA{R: 0xa3, G: 0x1e, B: 0x0a, A: 0xff}:
+		score += 7
+	case color.RGBA{R: 0xc2, G: 0x85, B: 0x0a, A: 0xff}:
+		score += 5
+	case color.RGBA{R: 0x0a, G: 0x85, B: 0x33, A: 0xff}:
+		score += 3
+	case color.RGBA{R: 0xc2, G: 0xc2, B: 0x29, A: 0xff}:
+		score += 1
+
 	}
 }

@@ -3,14 +3,24 @@ package main
 import (
 	"fmt"
 	"image/color"
+	"log"
 
+	"github.com/hajimehoshi/ebiten/examples/resources/fonts"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/text"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/opentype"
 )
 
 const blockColumns = 14
 const blockRows = 8
 const startingBlocks = blockColumns * blockRows
 const headingHeight = 40
+
+var (
+	normalFont font.Face
+	score      int
+)
 
 type Game struct {
 	blocks []Block
@@ -55,6 +65,21 @@ func NewGame() *Game {
 	g.ball = Ball{}
 	g.ball.Init()
 
+	tt, err := opentype.Parse(fonts.MPlus1pRegular_ttf)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	const dpi = 72
+	normalFont, err = opentype.NewFace(tt, &opentype.FaceOptions{
+		Size:    24,
+		DPI:     dpi,
+		Hinting: font.HintingVertical,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	return g
 }
 
@@ -72,6 +97,7 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
+	text.Draw(screen, fmt.Sprint(score), normalFont, 10, 30, color.White)
 	for _, b := range g.blocks {
 		b.Draw(screen)
 	}
@@ -120,18 +146,22 @@ func (g *Game) checkCollisions() {
 			block.y+block.height > g.ball.y-g.ball.radius {
 
 			if (block.y+block.height)-(g.ball.y-g.ball.radius) < 0 {
-				fmt.Println("collision with bottom surface of", i)
-				g.blocks[i].hit = true
-				g.ball.switchDirection()
-				fmt.Println("heading", g.ball.heading)
-				break
-			}
-
-			if block.y-(g.ball.y+g.ball.radius) < 0 {
 				fmt.Println("collision with top surface of", i)
 				g.blocks[i].hit = true
 				g.ball.switchDirection()
 				fmt.Println("heading", g.ball.heading)
+				fmt.Println("speed", g.ball.speed)
+				incrementScore(block.colour)
+				break
+			}
+
+			if block.y-(g.ball.y+g.ball.radius) < 0 {
+				fmt.Println("collision with bottom surface of", i)
+				g.blocks[i].hit = true
+				g.ball.switchDirection()
+				fmt.Println("heading", g.ball.heading)
+				fmt.Println("speed", g.ball.speed)
+				incrementScore(block.colour)
 				break
 			}
 
@@ -140,6 +170,8 @@ func (g *Game) checkCollisions() {
 				g.blocks[i].hit = true
 				g.ball.bounceOffWall()
 				fmt.Println("heading", g.ball.heading)
+				fmt.Println("speed", g.ball.speed)
+				incrementScore(block.colour)
 				break
 			}
 
@@ -148,17 +180,20 @@ func (g *Game) checkCollisions() {
 				g.blocks[i].hit = true
 				g.ball.bounceOffWall()
 				fmt.Println("heading", g.ball.heading)
+				fmt.Println("speed", g.ball.speed)
+				incrementScore(block.colour)
 				break
 			}
 		}
 	}
 
 	//walls
-	if (g.ball.y - g.ball.radius) <= headingHeight {
+	if (g.ball.y - g.ball.radius) <= 0 {
 
 		fmt.Println("collision with ceiling")
 		g.ball.switchDirection()
 		fmt.Println("heading", g.ball.heading)
+		fmt.Println("speed", g.ball.speed)
 	}
 
 	if (g.ball.x - g.ball.radius) <= 0 {
@@ -166,6 +201,7 @@ func (g *Game) checkCollisions() {
 		fmt.Println("collision with left wall")
 		g.ball.bounceOffWall()
 		fmt.Println("heading", g.ball.heading)
+		fmt.Println("speed", g.ball.speed)
 	}
 
 	if (g.ball.x + g.ball.radius) >= screenWidth {
@@ -173,6 +209,7 @@ func (g *Game) checkCollisions() {
 		fmt.Println("collision with right wall")
 		g.ball.bounceOffWall()
 		fmt.Println("heading", g.ball.heading)
+		fmt.Println("speed", g.ball.speed)
 	}
 
 	if (g.ball.y + g.ball.radius) >= screenHeight {
@@ -181,6 +218,7 @@ func (g *Game) checkCollisions() {
 		g.ball.Init()
 		g.ball.x = g.paddle.x + (g.paddle.width / 2)
 		fmt.Println("heading", g.ball.heading)
+		fmt.Println("speed", g.ball.speed)
 	}
 
 	//paddle
@@ -192,5 +230,6 @@ func (g *Game) checkCollisions() {
 		fmt.Println("collision with paddle")
 		g.ball.switchDirection()
 		fmt.Println("heading", g.ball.heading)
+		fmt.Println("speed", g.ball.speed)
 	}
 }
